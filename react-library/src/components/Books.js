@@ -29,11 +29,19 @@ function BookInfoFields(props) {
 
 export class Books extends React.Component {
   render() {
+    let removeBook = this.props.removeBook;
+    let editBook = this.props.editBook;
+
     this.BOOKS = this.props.books.map(function(book) {
-      console.log(book);
-      return <Book data={book} />;
+      return (
+        <Book
+          key={book.TITLE + book.AUTHOR}
+          removeBook={removeBook}
+          editBook={editBook}
+          data={book}
+        />
+      );
     });
-    console.log(this.props.books);
 
     return (
       <div id="book-container">
