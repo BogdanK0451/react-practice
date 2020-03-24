@@ -131,7 +131,3 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById("root")
 );
-
-function toCelsius() {}
-
-function toFahrenheit() {}
