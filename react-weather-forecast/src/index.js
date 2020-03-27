@@ -26,6 +26,7 @@ class Weather extends React.Component {
   }
   handleChange(e) {
     this.setState({ myCity: e.target.value });
+    throw new Error("blyat");
   }
 
   handleTemperature(e) {

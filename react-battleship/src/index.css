@@ -1,0 +1,52 @@
+body,
+html,
+#root {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#game-space {
+  position: fixed;
+  left: 30%;
+  top: 30%;
+}
+
+.battlefield {
+  grid-template-columns: repeat(11, 32px);
+  grid-template-rows: repeat(11, 32px);
+  display: inline-grid;
+  box-sizing: border-box;
+}
+
+#player1.battlefield {
+  margin-right: 100px;
+}
+
+.battlefield-cell {
+  border-right: 1px solid #b4b4ff;
+  border-bottom: 1px solid #b4b4ff;
+}
+
+.coord-x,
+.coord-y > p {
+  font-family: "PT Sans", arial, sans-serif;
+  font-size: 16px;
+  text-align: center;
+  margin: 0px;
+  line-height: 32px;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.coord-x {
+  border-bottom: 1px solid #b4b4ff;
+}
+.coord-y {
+  border-right: 1px solid #b4b4ff;
+}
