@@ -1,7 +1,9 @@
-const BOATCOUNT = 4;
-const SHIPCOUNT = 3;
-const SUBMARINE = 2;
-const CRUISER = 1;
+// const BOATCOUNT = 4;
+// const SHIPCOUNT = 3;
+// const SUBMARINE = 2;
+// const CRUISER = 1;
+const BOARDWIDTH = 10;
+const BOARDHEIGHT = 10;
 
 export function createShip(length) {
   let hullHit = [];
@@ -28,16 +30,16 @@ export function createShip(length) {
 
 export function createFleet() {
   return {
-    boat1: createShip(1),
-    boat2: createShip(1),
-    boat3: createShip(1),
-    boat4: createShip(1),
+    cruiser1: createShip(4),
+    submarine1: createShip(3),
+    submarine2: createShip(3),
     ship1: createShip(2),
     ship2: createShip(2),
     ship3: createShip(2),
-    submarine1: createShip(3),
-    submarine2: createShip(3),
-    cruiser1: createShip(4)
+    boat1: createShip(1),
+    boat2: createShip(1),
+    boat3: createShip(1),
+    boat4: createShip(1)
   };
 }
 
@@ -54,114 +56,138 @@ export function createGameBoard(fleet) {
   }
   for (const ship in fleet) {
     if (fleet.hasOwnProperty(ship)) {
-      randomlyPositionShip(fleet[ship]);
+      randomlyPositionShip(
+        fleet[ship],
+        ship.substr(0, 3).concat(ship.charAt(ship.length - 1))
+      );
     }
   }
 
-  function randomlyPositionShip(ship) {
-    if (ship.length > 1)
-      randVals = removeInvalidPositions(randVals, ship.length);
+  function randomlyPositionShip(ship, shipName) {
+    function markShipOnBoard(shipCords) {
+      for (let i = 0; i < shipCords.length; i++) {
+        board[shipCords[i][0]][shipCords[i][1]] = shipName + " " + i;
+      }
+    }
+    function markShipNeighborsOnBoard(neighborCords) {
+      for (let i = 0; i < neighborCords.length; i++) {
+        board[neighborCords[i][0]][neighborCords[i][1]] = 2;
+      }
+    }
+    function rmvShipPosFromPool() {
+      let invalidPos = [];
+      let shipCords = [];
 
-    let rand = randVals[Math.floor(Math.random() * randVals.length)];
+      if (ship.orientation === "v") {
+        for (let i = 0; i < ship.length; i++) {
+          shipCords.push([Math.floor(rand / 10) + i, rand % 10]);
+        }
+      } else if (ship.orientation === "h") {
+        for (let i = 0; i < ship.length; i++) {
+          shipCords.push([Math.floor(rand / 10), (rand % 10) + i]);
+        }
+      }
+      invalidPos = shipCords.map(elem => elem[0] * 10 + elem[1]);
+      randVals = randVals.filter(i => invalidPos.indexOf(i) === -1);
+      return shipCords;
+    }
+    function rmvNeighborsPosFromPool() {
+      let invalidPos = [];
+      let x = rand % 10;
+      let y = Math.floor(rand / 10);
+      let neighborsCords = [];
 
+      if (ship.orientation === "v") {
+        if (y - 1 >= 0) {
+          if (x - 1 >= 0) {
+            neighborsCords.push([y - 1, x - 1]);
+          }
+          neighborsCords.push([y - 1, x]);
+          if (x + 1 <= BOARDWIDTH - 1) {
+            neighborsCords.push([y - 1, x + 1]);
+          }
+        }
+
+        for (let i = 0; i < ship.length; i++) {
+          if (x - 1 >= 0) {
+            neighborsCords.push([y + i, x - 1]);
+          }
+          if (x + 1 <= BOARDWIDTH - 1) {
+            neighborsCords.push([y + i, x + 1]);
+          }
+        }
+
+        if (y + ship.length <= BOARDHEIGHT - 1) {
+          if (x - 1 >= 0) {
+            neighborsCords.push([y + ship.length, x - 1]);
+          }
+          neighborsCords.push([y + ship.length, x]);
+          if (x + 1 <= BOARDWIDTH - 1) {
+            neighborsCords.push([y + ship.length, x + 1]);
+          }
+        }
+      }
+      if (ship.orientation === "h") {
+        if (x - 1 >= 0) {
+          if (y - 1 >= 0) {
+            neighborsCords.push([y - 1, x - 1]);
+          }
+          neighborsCords.push([y, x - 1]);
+          if (y + 1 <= BOARDHEIGHT - 1) {
+            neighborsCords.push([y + 1, x - 1]);
+          }
+        }
+
+        for (let i = 0; i < ship.length; i++) {
+          if (y - 1 >= 0) {
+            neighborsCords.push([y - 1, x + i]);
+          }
+          if (y + 1 <= BOARDHEIGHT - 1) {
+            neighborsCords.push([y + 1, x + i]);
+          }
+        }
+
+        if (x + ship.length <= BOARDWIDTH - 1) {
+          if (y - 1 >= 0) {
+            neighborsCords.push([y - 1, x + ship.length]);
+          }
+          neighborsCords.push([y, x + ship.length]);
+          if (y + 1 <= BOARDHEIGHT - 1) {
+            neighborsCords.push([y + 1, x + ship.length]);
+          }
+        }
+      }
+      invalidPos = neighborsCords.map(elem => elem[0] * 10 + elem[1]);
+      randVals = randVals.filter(i => invalidPos.indexOf(i) === -1);
+      return neighborsCords;
+    }
+    let rand;
+    let fail = false;
     if (ship.orientation === "v") {
-      let x = rand % 10;
-      let y = Math.floor(rand / 10);
+      do {
+        fail = false;
+        rand = randVals[Math.floor(Math.random() * randVals.length)];
 
-      for (let i = 0; i < ship.length; i++) {
-        board[x + i][y] = 1;
-      }
+        if (Math.floor(rand / 10) + ship.length - 1 > 9) fail = true;
+        else
+          for (let i = 0; i < ship.length; i++)
+            fail = fail || board[Math.floor(rand / 10) + i][rand % 10] !== 0;
+      } while (fail);
     } else if (ship.orientation === "h") {
-      let x = rand % 10;
-      let y = Math.floor(rand / 10);
+      do {
+        fail = false;
+        rand = randVals[Math.floor(Math.random() * randVals.length)];
 
-      for (let i = 0; i < ship.length; i++) {
-        board[x][y + i] = 1;
-      }
+        if ((rand % 10) + ship.length - 1 > 9) fail = true;
+        else
+          for (let i = 0; i < ship.length; i++)
+            fail = fail || board[Math.floor(rand / 10)][(rand % 10) + i] !== 0;
+      } while (fail);
     }
+    let shipCords = rmvShipPosFromPool();
+    markShipOnBoard(shipCords);
+    let shipNeighborsCords = rmvNeighborsPosFromPool();
+    markShipNeighborsOnBoard(shipNeighborsCords);
   }
-  console.log(randVals);
-  console.log(board);
-}
-
-function findAndRemoveNeighbours(x, y, shipSize, shipOrientation) {
-  let invalidPos = [];
-
-  //removing locations where a ship already is from the set of possible locations where next ship will be
-  for (let i = 0; i < shipSize; i++)
-    if (shipOrientation === "v") {
-      invalidPos.push(x * 10 + y + i);
-    }
-}
-
-function removeInvalidPositions(randVals, shipLength) {
-  let size2InvalidPos = [
-    99,
-    98,
-    97,
-    96,
-    95,
-    94,
-    93,
-    92,
-    91,
-    90,
-    9,
-    19,
-    29,
-    39,
-    49,
-    59,
-    69,
-    79,
-    89
-  ];
-  let size3InvalidPos = [
-    88,
-    87,
-    86,
-    85,
-    84,
-    83,
-    82,
-    81,
-    80,
-    8,
-    18,
-    28,
-    38,
-    48,
-    58,
-    68,
-    78
-  ];
-  let size4InvalidPos = [
-    77,
-    76,
-    75,
-    74,
-    73,
-    72,
-    71,
-    70,
-    7,
-    17,
-    27,
-    37,
-    47,
-    57,
-    67
-  ];
-  switch (shipLength) {
-    case 2:
-      randVals = randVals.filter(i => size2InvalidPos.indexOf(i) === -1);
-      break;
-    case 3:
-      randVals = randVals.filter(i => size3InvalidPos.indexOf(i) === -1);
-      break;
-    case 4:
-      randVals = randVals.filter(i => size4InvalidPos.indexOf(i) === -1);
-      break;
-  }
-  return randVals;
+  return board;
 }

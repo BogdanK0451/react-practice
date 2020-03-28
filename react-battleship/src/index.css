@@ -50,3 +50,10 @@ html,
 .coord-y {
   border-right: 1px solid #b4b4ff;
 }
+
+.ship {
+  border: 2px solid #00f;
+  background: rgba(0, 0, 255, 0.2);
+
+  box-sizing: border-box;
+}

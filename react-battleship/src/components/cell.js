@@ -24,7 +24,13 @@ export class Cell extends React.Component {
     } else {
       return (
         <>
-          <div className={`${this.props.type} battlefield-cell`}></div>
+          {typeof this.props.contains === "string" ? (
+            <div className={`${this.props.type} battlefield-cell ship`}></div>
+          ) : this.props.contains === 2 ? (
+            <div className={`${this.props.type} battlefield-cell`}>*</div>
+          ) : (
+            <div className={`${this.props.type} battlefield-cell`}></div>
+          )}
         </>
       );
     }
