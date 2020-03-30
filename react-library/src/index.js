@@ -78,7 +78,6 @@ class Library extends React.Component {
   }
 
   handleRemoveBook(e) {
-    console.log(e.target.dataset.title);
     this.setState({
       books: this.state.books.filter(function(book) {
         return (

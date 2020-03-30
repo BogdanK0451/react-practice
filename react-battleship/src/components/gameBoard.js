@@ -7,7 +7,8 @@ export class GameBoard extends React.Component {
     let elements = createGameBoardCells(
       this.props.rows,
       this.props.cols,
-      this.props.board
+      this.props.board,
+      this.props.onCellClick
     );
     return (
       <div id={this.props.id} className="battlefield">
@@ -17,7 +18,7 @@ export class GameBoard extends React.Component {
   }
 }
 
-function createGameBoardCells(rows, cols, board) {
+function createGameBoardCells(rows, cols, board, onCellClick) {
   let elements = [];
   for (let i = 0; i < rows + 1; i++) {
     for (let j = 0; j < cols + 1; j++) {
@@ -30,8 +31,10 @@ function createGameBoardCells(rows, cols, board) {
       else
         elements.push(
           <Cell
-            contains={board[i - 1][j - 1]}
+            onCellClick={onCellClick}
+            cellData={board[i - 1][j - 1]}
             key={`${i} ${j}`}
+            identifier={`${i - 1}${j - 1}`}
             type="playField"
           />
         );

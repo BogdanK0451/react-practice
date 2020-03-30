@@ -1,28 +1,28 @@
-// const BOATCOUNT = 4;
-// const SHIPCOUNT = 3;
-// const SUBMARINE = 2;
-// const CRUISER = 1;
-const BOARDWIDTH = 10;
-const BOARDHEIGHT = 10;
+import {
+  FREE,
+  TAKEN,
+  RESERVED,
+  BOARDWIDTH,
+  BOARDHEIGHT,
+  NORMAL_CELL,
+  NEARBY_CELL
+} from "../logic/const.js";
 
 export function createShip(length) {
-  let hullHit = [];
-  hullHit.length = length;
-  hullHit.fill(0);
+  let hits = 0;
 
   let orientation = Math.round(Math.random()) ? "v" : "h";
 
-  function hit(pos) {
-    hullHit[pos] = 1;
+  function hit() {
+    hits++;
   }
   function isSunk() {
-    return hullHit.every(hull => hull === 1);
+    return hits === length;
   }
 
   return {
     length,
     orientation,
-    hullHit,
     hit,
     isSunk
   };
@@ -47,7 +47,9 @@ export function createGameBoard(fleet) {
   let board = Array(10)
     .fill(null)
     .map(function() {
-      return Array(10).fill(0);
+      return Array(10).fill(
+        FREE + ";" + "open" + ";" + NORMAL_CELL + ";" + "none"
+      );
     }); //Array(10).fill(Array(10).fill(0));        https://stackoverflow.com/questions/37949813/array-fillarray-creates-copies-by-references-not-by-value
   let randVals = [];
 
@@ -56,22 +58,27 @@ export function createGameBoard(fleet) {
   }
   for (const ship in fleet) {
     if (fleet.hasOwnProperty(ship)) {
-      randomlyPositionShip(
-        fleet[ship],
-        ship.substr(0, 3).concat(ship.charAt(ship.length - 1))
-      );
+      randomlyPositionShip(fleet[ship], ship);
     }
   }
 
   function randomlyPositionShip(ship, shipName) {
     function markShipOnBoard(shipCords) {
       for (let i = 0; i < shipCords.length; i++) {
-        board[shipCords[i][0]][shipCords[i][1]] = shipName + " " + i;
+        board[shipCords[i][0]][shipCords[i][1]] =
+          TAKEN + ";" + "open" + ";" + NORMAL_CELL + ";" + shipName;
       }
     }
     function markShipNeighborsOnBoard(neighborCords) {
       for (let i = 0; i < neighborCords.length; i++) {
-        board[neighborCords[i][0]][neighborCords[i][1]] = 2;
+        if (
+          board[neighborCords[i][0]][neighborCords[i][1]].split(";")[2] ===
+          NEARBY_CELL
+        )
+          board[neighborCords[i][0]][neighborCords[i][1]] += shipName;
+        else
+          board[neighborCords[i][0]][neighborCords[i][1]] =
+            FREE + ";" + "open" + ";" + NEARBY_CELL + ";" + shipName;
       }
     }
     function rmvShipPosFromPool() {
@@ -171,7 +178,10 @@ export function createGameBoard(fleet) {
         if (Math.floor(rand / 10) + ship.length - 1 > 9) fail = true;
         else
           for (let i = 0; i < ship.length; i++)
-            fail = fail || board[Math.floor(rand / 10) + i][rand % 10] !== 0;
+            fail =
+              fail ||
+              board[Math.floor(rand / 10) + i][rand % 10].split(";")[0] !==
+                FREE;
       } while (fail);
     } else if (ship.orientation === "h") {
       do {
@@ -181,7 +191,10 @@ export function createGameBoard(fleet) {
         if ((rand % 10) + ship.length - 1 > 9) fail = true;
         else
           for (let i = 0; i < ship.length; i++)
-            fail = fail || board[Math.floor(rand / 10)][(rand % 10) + i] !== 0;
+            fail =
+              fail ||
+              board[Math.floor(rand / 10)][(rand % 10) + i].split(";")[0] !==
+                FREE;
       } while (fail);
     }
     let shipCords = rmvShipPosFromPool();

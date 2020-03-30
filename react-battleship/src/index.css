@@ -16,16 +16,17 @@ html,
   grid-template-columns: repeat(11, 32px);
   grid-template-rows: repeat(11, 32px);
   display: inline-grid;
-  box-sizing: border-box;
 }
 
 #player1.battlefield {
   margin-right: 100px;
 }
 
-.battlefield-cell {
+.base-cell {
+  height: 32px;
   border-right: 1px solid #b4b4ff;
   border-bottom: 1px solid #b4b4ff;
+  box-sizing: border-box;
 }
 
 .coord-x,
@@ -51,9 +52,52 @@ html,
   border-right: 1px solid #b4b4ff;
 }
 
-.ship {
+.ship-cell {
   border: 2px solid #00f;
   background: rgba(0, 0, 255, 0.2);
 
   box-sizing: border-box;
+}
+
+.ship-miss,
+.auto-ship-miss {
+  background-color: #333;
+  position: relative;
+  top: 41%;
+  left: 40%;
+  content: " ";
+  height: 6px;
+  width: 6px;
+  background-color: #000;
+  border-radius: 50%;
+  display: block;
+}
+.ship-hit {
+  border: 2px solid red;
+  width: 32px;
+  height: 32px;
+  position: relative;
+  box-sizing: border-box;
+}
+.ship-hit:before {
+  content: "";
+  height: 32px;
+  border-left: 2px solid red;
+  position: absolute;
+  top: -2px;
+  left: 13px;
+  transform: rotate(45deg);
+}
+.ship-hit:after {
+  content: "";
+  height: 32px;
+  border-left: 2px solid red;
+  position: absolute;
+  top: -2px;
+  left: 13px;
+  transform: rotate(-45deg);
+}
+
+.auto-ship-miss {
+  background-color: rgb(131, 131, 131);
 }

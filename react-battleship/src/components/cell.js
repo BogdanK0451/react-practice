@@ -1,5 +1,6 @@
 import React from "react";
 import "../index.css";
+import { MISS, HIT, AUTOMISS, TAKEN, NORMAL_CELL } from "../logic/const.js";
 
 export class Cell extends React.Component {
   render() {
@@ -22,17 +23,44 @@ export class Cell extends React.Component {
     } else if (this.props.type === "filler") {
       return <div></div>;
     } else {
-      return (
-        <>
-          {typeof this.props.contains === "string" ? (
-            <div className={`${this.props.type} battlefield-cell ship`}></div>
-          ) : this.props.contains === 2 ? (
-            <div className={`${this.props.type} battlefield-cell`}>*</div>
-          ) : (
-            <div className={`${this.props.type} battlefield-cell`}></div>
-          )}
-        </>
-      );
+      if (this.props.cellData.split(";")[1] === "open") {
+        return (
+          <>
+            {this.props.cellData.split(";")[0] === TAKEN ? (
+              <div
+                data-cell={this.props.cellData}
+                data-identifier={this.props.identifier}
+                className={`${this.props.type} ship-cell`}
+                onClick={this.props.onCellClick}
+              ></div>
+            ) : (
+              <div
+                data-cell={this.props.cellData}
+                data-identifier={this.props.identifier}
+                className={`${this.props.type} base-cell`}
+                onClick={this.props.onCellClick}
+              ></div>
+            )}
+          </>
+        );
+      } else if (this.props.cellData.split(";")[1] === "closed") {
+        return (
+          <>
+            {this.props.cellData.split(";")[0] === HIT ? (
+              <div className={`${this.props.type} ship-hit`}></div>
+            ) : this.props.cellData.split(";")[0] === MISS &&
+              this.props.cellData.split(";")[2] === NORMAL_CELL ? (
+              <div className={`${this.props.type} base-cell`}>
+                <div className="ship-miss"></div>
+              </div>
+            ) : (
+              <div className={`${this.props.type} base-cell`}>
+                <div className="auto-ship-miss"></div>
+              </div>
+            )}
+          </>
+        );
+      }
     }
   }
 }
