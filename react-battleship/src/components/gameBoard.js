@@ -5,20 +5,23 @@ import { Cell } from "../components/cell.js";
 export class GameBoard extends React.Component {
   render() {
     let elements = createGameBoardCells(
-      this.props.rows,
-      this.props.cols,
+      this.props.id,
+      this.props.onCellClick,
       this.props.board,
-      this.props.onCellClick
+      this.props.rows,
+      this.props.cols
     );
     return (
-      <div id={this.props.id} className="battlefield">
-        {elements}
-      </div>
+      <>
+        <div id={this.props.id} className="battlefield">
+          {elements}
+        </div>
+      </>
     );
   }
 }
 
-function createGameBoardCells(rows, cols, board, onCellClick) {
+function createGameBoardCells(id, onCellClick, board, rows, cols) {
   let elements = [];
   for (let i = 0; i < rows + 1; i++) {
     for (let j = 0; j < cols + 1; j++) {
@@ -31,6 +34,7 @@ function createGameBoardCells(rows, cols, board, onCellClick) {
       else
         elements.push(
           <Cell
+            player={id}
             onCellClick={onCellClick}
             cellData={board[i - 1][j - 1]}
             key={`${i} ${j}`}
@@ -40,5 +44,6 @@ function createGameBoardCells(rows, cols, board, onCellClick) {
         );
     }
   }
+
   return elements;
 }

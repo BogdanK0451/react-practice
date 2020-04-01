@@ -8,8 +8,12 @@ html,
 
 #game-space {
   position: fixed;
-  left: 30%;
-  top: 30%;
+
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 830px;
+  height: 610px;
 }
 
 .battlefield {
@@ -19,7 +23,15 @@ html,
 }
 
 #player1.battlefield {
+  float: left;
   margin-right: 100px;
+}
+#player2.battlefield {
+  float: right;
+}
+button {
+  margin-top: 20px;
+  float: left;
 }
 
 .base-cell {
@@ -52,7 +64,9 @@ html,
   border-right: 1px solid #b4b4ff;
 }
 
-.ship-cell {
+.ship-cell,
+.scoreboard-ship-cell,
+.scoreboard-ship-cell-hit {
   border: 2px solid #00f;
   background: rgba(0, 0, 255, 0.2);
 
@@ -100,4 +114,42 @@ html,
 
 .auto-ship-miss {
   background-color: rgb(131, 131, 131);
+}
+
+.scoreboard-container {
+  width: 100%;
+  height: 210px;
+}
+
+.scoreboard-container-p1,
+.scoreboard-container-p2 {
+  height: 210px;
+  width: 50px;
+  display: inline-block;
+}
+.scoreboard-container-p2 {
+  float: right;
+}
+
+.scoreboard-ship-cell {
+  display: inline-block;
+  border-width: 1px;
+  width: 12px;
+  height: 12px;
+}
+.scoreboard-ship-cell-hit {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  border-width: 1px;
+  border-color: red;
+  background: rgba(255, 0, 0, 0.2);
+}
+.empty-div {
+  width: 10px;
+  display: block;
+  height: 1px;
+}
+p {
+  display: inline;
 }

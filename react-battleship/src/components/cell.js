@@ -1,7 +1,6 @@
 import React from "react";
 import "../index.css";
-import { MISS, HIT, AUTOMISS, TAKEN, NORMAL_CELL } from "../logic/const.js";
-
+import { MISS, HIT, TAKEN, NORMAL_CELL } from "../logic/const.js";
 export class Cell extends React.Component {
   render() {
     if (this.props.type === "colIndex") {
@@ -23,11 +22,15 @@ export class Cell extends React.Component {
     } else if (this.props.type === "filler") {
       return <div></div>;
     } else {
-      if (this.props.cellData.split(";")[1] === "open") {
+      if (
+        this.props.cellData.split(";")[1] === "open" &&
+        this.props.player === "player1"
+      ) {
         return (
           <>
             {this.props.cellData.split(";")[0] === TAKEN ? (
               <div
+                data-player={this.props.player}
                 data-cell={this.props.cellData}
                 data-identifier={this.props.identifier}
                 className={`${this.props.type} ship-cell`}
@@ -35,6 +38,7 @@ export class Cell extends React.Component {
               ></div>
             ) : (
               <div
+                data-player={this.props.player}
                 data-cell={this.props.cellData}
                 data-identifier={this.props.identifier}
                 className={`${this.props.type} base-cell`}
@@ -42,6 +46,18 @@ export class Cell extends React.Component {
               ></div>
             )}
           </>
+        );
+      } else if (
+        this.props.cellData.split(";")[1] === "open" &&
+        this.props.player === "player2"
+      ) {
+        return (
+          <div
+            data-cell={this.props.cellData}
+            data-identifier={this.props.identifier}
+            className={`${this.props.type} base-cell`}
+            onClick={this.props.onCellClick}
+          ></div>
         );
       } else if (this.props.cellData.split(";")[1] === "closed") {
         return (
