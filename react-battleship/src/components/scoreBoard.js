@@ -12,11 +12,17 @@ export class ScoreBoard extends React.Component {
       this.props.player2Fleet
     );
     return (
-      <div className="scoreboard-container">
-        <div className="scoreboard-container-p1"> {player1Score}</div>
-        <p id="winner">kurac</p>
-        <div className="scoreboard-container-p2"> {player2Score}</div>
-      </div>
+      <>
+        <div id="winner-container">
+          <p className={this.props.winner ? "bounce-in-top" : undefined}>
+            {`${this.props.winner ? this.props.winner + " Wins" : ""}`}
+          </p>
+        </div>
+        <div className="scoreboard-container">
+          <div className="scoreboard-container-p1"> {player1Score}</div>
+          <div className="scoreboard-container-p2"> {player2Score}</div>
+        </div>
+      </>
     );
   }
 }

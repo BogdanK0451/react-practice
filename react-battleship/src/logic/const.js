@@ -1,4 +1,7 @@
 export const BOARDWIDTH = 10;
+export const PLAYER1 = 0;
+export const PLAYER2 = 1;
+export const GAMEOVER = 0;
 export const BOARDHEIGHT = 10;
 export const FREE = "0";
 export const TAKEN = "1";

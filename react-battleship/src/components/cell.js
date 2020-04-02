@@ -53,6 +53,7 @@ export class Cell extends React.Component {
       ) {
         return (
           <div
+            data-player={this.props.player}
             data-cell={this.props.cellData}
             data-identifier={this.props.identifier}
             className={`${this.props.type} base-cell`}
@@ -63,10 +64,22 @@ export class Cell extends React.Component {
         return (
           <>
             {this.props.cellData.split(";")[0] === HIT ? (
-              <div className={`${this.props.type} ship-hit`}></div>
+              <div
+                className={`${
+                  this.props.identifier === this.props.lastClickedCell
+                    ? this.props.type + " last-clicked-cell"
+                    : this.props.type
+                } ship-hit`}
+              ></div>
             ) : this.props.cellData.split(";")[0] === MISS &&
               this.props.cellData.split(";")[2] === NORMAL_CELL ? (
-              <div className={`${this.props.type} base-cell`}>
+              <div
+                className={`${
+                  this.props.identifier === this.props.lastClickedCell
+                    ? this.props.type + " last-clicked-cell"
+                    : this.props.type
+                } base-cell`}
+              >
                 <div className="ship-miss"></div>
               </div>
             ) : (

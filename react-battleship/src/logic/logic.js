@@ -46,13 +46,16 @@ export function createFleet() {
   };
   let fleetShipCount = Object.keys(fleet).length;
 
-  function isFleetDestroyed() {
+  function sinkOneShip() {
     fleetShipCount--;
+  }
+  function isFleetDestroyed() {
     if (fleetShipCount === 0) return true;
     else return false;
   }
 
   return {
+    sinkOneShip,
     isFleetDestroyed,
     ...fleet
   };
@@ -222,6 +225,7 @@ export function createPlayer(name, fleet, board) {
   return {
     name,
     fleet,
-    board
+    board,
+    lastClickedCell: undefined
   };
 }
