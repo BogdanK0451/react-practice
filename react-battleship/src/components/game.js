@@ -1,11 +1,13 @@
+//wasteful rerenders
+
 import React from "react";
 import "../index.css";
 import { GameBoard } from "./gameBoard.js";
 import { ScoreBoard } from "./scoreBoard.js";
 import * as logic from "../logic/logic.js";
 import {
-  FREE,
-  TAKEN,
+  FALSE,
+  TRUE,
   BOARDHEIGHT,
   BOARDWIDTH,
   NORMAL_CELL,
@@ -34,6 +36,7 @@ function createPlayers() {
 }
 
 let players = createPlayers(); // window[dataset.player] ne radi
+let AI = logic.createAI();
 let turnHistory = [];
 
 let shipMissAudio = new Audio("/doom-shotgun.mp3");
@@ -53,6 +56,8 @@ export class Game extends React.Component {
       player1: cloneDeep(players.player1),
       player2: cloneDeep(players.player2)
     };
+    this.timeOut = null;
+    this.counter = 0;
     this.lastTurn = 1;
 
     this.handleCellClick = this.handleCellClick.bind(this);
@@ -65,22 +70,23 @@ export class Game extends React.Component {
   }
 
   checkForWinner() {
-    if (this.state.player1.fleet.isFleetDestroyed())
+    if (this.state.player1.fleet.isFleetDestroyed()) {
       this.setState({
         gameOver: !this.state.gameOver,
         winner: this.state.player2.name
       });
-    else if (this.state.player2.fleet.isFleetDestroyed())
+    } else if (this.state.player2.fleet.isFleetDestroyed()) {
       this.setState({
         gameOver: !this.state.gameOver,
         winner: this.state.player1.name
       });
+    }
   }
 
   handlePreviousTurnClick(e) {}
   handleNextTurnClick(e) {}
-
   handleRestartClick(e) {
+    clearTimeout(this.timeOut);
     players = createPlayers();
     this.setState({
       width: BOARDWIDTH,
@@ -93,53 +99,7 @@ export class Game extends React.Component {
       player2: cloneDeep(players.player2)
     });
   }
-  handleCellClick(e, yFromAI, xFromAI) {
-    console.log(yFromAI);
-    let y, x, cellContent, shipName, player;
-    if (yFromAI === undefined) {
-      y = parseInt(e.target.dataset.identifier[0]);
-      x = parseInt(e.target.dataset.identifier[1]);
-      cellContent = e.target.dataset.cell.split(";")[0];
-      shipName = e.target.dataset.cell.split(";")[3];
-      player = e.target.dataset.player;
-    } else {
-      y = yFromAI;
-      x = xFromAI;
-      cellContent = e.target.dataset.cell.split(";")[0];
-      shipName = e.target.dataset.cell.split(";")[3];
-      player = e.target.dataset.player;
-    }
-
-    players[player].lastClickedCell = y.toString() + x.toString();
-
-    if (cellContent === FREE) {
-      playAudio(shipMissAudio);
-      handleMiss();
-      this.setState({ turnOwner: !this.state.turnOwner });
-    } else if (cellContent === TAKEN) {
-      handleHit();
-
-      if (players[player].fleet[shipName].isSunk()) {
-        playAudio(shipSunkAudio);
-        handleNearbyCells();
-      } else {
-        playAudio(shipHitAudio);
-        handleNearbyDiagonalCells();
-      }
-    }
-    if (player === "player1")
-      this.setState({
-        player1: cloneDeep(players[player]),
-        turn: this.state.turn + 1
-      });
-    else if (player === "player2")
-      this.setState({
-        player2: cloneDeep(players[player]),
-        turn: this.state.turn + 1
-      });
-
-    this.checkForWinner();
-
+  handleCellClick(e, y, x, hasShip, shipName, player) {
     function handleMiss() {
       let tempArr = players[player].board[y][x].split(";");
       tempArr[2] = NORMAL_CELL;
@@ -151,7 +111,7 @@ export class Game extends React.Component {
     }
     function handleHit() {
       players[player].fleet[shipName].hit();
-      if (players[player].fleet[shipName].isSunk()) {
+      if (players[player].fleet[shipName].hasSunk()) {
         players[player].fleet.sinkOneShip();
       }
       players[player].board[y][x] = players[player].board[y][x].replace(
@@ -188,30 +148,127 @@ export class Game extends React.Component {
           x + 1
         ].replace("open", "closed");
     }
-  }
+    //if function was called through cell Click and not through AI function
+    if (y === undefined || x === undefined) {
+      y = parseInt(e.target.dataset.identifier[0]);
+      x = parseInt(e.target.dataset.identifier[1]);
+      hasShip = e.target.dataset.cell.split(";")[0];
+      shipName = e.target.dataset.cell.split(";")[3];
+      player = e.target.dataset.player;
+    }
 
-  componentDidUpdate() {
-    // if (!this.state.turnOwner && players.player2.name !== "AI") {
-    //   let y;
-    //   let x;
-    //   let fail = true;
-    //   console.log("lmao");
-    //   do {
-    //     y = Math.floor(Math.random() * 10);
-    //     x = Math.floor(Math.random() * 10);
-    //     if (players.player1.board[y][x].includes("open")) {
-    //     } else fail = true;
-    //   } while (fail);
-    // }
-  }
+    players[player].lastClickedCell = y.toString() + x.toString();
 
-  // createAITurn() {}
+    let updateTurnOwnerFlag = 0; // if we rerender by using setState inside the next block, for some reason page rerenders 4 times instead of 2
+    if (hasShip === FALSE) {
+      playAudio(shipMissAudio);
+      handleMiss();
+      updateTurnOwnerFlag = 1;
+    } else if (hasShip === TRUE) {
+      handleHit();
+
+      if (players[player].fleet[shipName].hasSunk()) {
+        playAudio(shipSunkAudio);
+        handleNearbyCells();
+      } else {
+        playAudio(shipHitAudio);
+        handleNearbyDiagonalCells();
+      }
+    }
+    this.checkForWinner();
+
+    if (player === "player1") {
+      if (updateTurnOwnerFlag)
+        this.setState(
+          {
+            player1: cloneDeep(players[player]),
+            turn: this.state.turn + 1,
+            turnOwner: !this.state.turnOwner
+          },
+          this.generateAITurn
+        );
+      else
+        this.setState(
+          {
+            player1: cloneDeep(players[player]),
+            turn: this.state.turn + 1
+          },
+          this.generateAITurn
+        );
+    } else if (player === "player2") {
+      if (updateTurnOwnerFlag)
+        this.setState(
+          {
+            player2: cloneDeep(players[player]),
+            turn: this.state.turn + 1,
+            turnOwner: !this.state.turnOwner
+          },
+          this.generateAITurn
+        );
+      else
+        this.setState(
+          {
+            player2: cloneDeep(players[player]),
+            turn: this.state.turn + 1
+          },
+          this.generateAITurn
+        );
+    }
+  }
+  generateAITurn() {
+    if (
+      this.state.turnOwner &&
+      players.player2.name === "AI" &&
+      !this.state.gameOver
+    ) {
+      let timeoutLength = Math.floor(Math.random() * 1000) + 500;
+      let y;
+      let x;
+      let fail = false;
+      //timeout to simulate human player
+      this.timeOut = setTimeout(() => {
+        //  if (!AI.huntedShip) {
+        do {
+          let rand =
+            players.player1.validMoves[
+              Math.floor(Math.random() * players.player1.validMoves.length)
+            ];
+          y = Math.floor(rand / 10);
+          x = rand % 10;
+          let indexOfRand = players.player1.validMoves.indexOf(rand);
+
+          if (players.player1.board[y][x].includes("open")) {
+            players.player1.validMoves.splice(indexOfRand, 1);
+            fail = false;
+
+            // for readability
+            let hasShip = players.player1.board[y][x].split(";")[0];
+            let shipName = players.player1.board[y][x].split(";")[3];
+
+            this.handleCellClick(undefined, y, x, hasShip, shipName, "player1");
+            if (hasShip === TRUE) {
+              if (!players.player1.fleet[shipName].hasSunk()) {
+                AI.huntedShip = shipName;
+                AI.huntedShipHullHits.push([y, x]);
+              } else AI.huntedShip = null;
+            }
+          } else fail = true;
+        } while (fail);
+        // } else if (AI.huntedShip) {}
+        //  }
+      }, timeoutLength);
+    }
+
+    function AILogic() {}
+  }
 
   render() {
+    this.counter++; //render counter
     return (
       <>
         <div id="game-space">
           <ScoreBoard
+            turnOwner={this.state.turnOwner}
             winner={this.state.winner}
             player1Name={this.state.player1.name}
             player1Fleet={this.state.player1.fleet}
@@ -238,6 +295,7 @@ export class Game extends React.Component {
                 ? this.handleCellClick
                 : undefined
             }
+            gameOver={this.state.gameOver}
             board={this.state.player2.board}
             rows={this.state.height}
             cols={this.state.width}

@@ -4,12 +4,16 @@ import "../index.css";
 export class ScoreBoard extends React.Component {
   render() {
     let player1Score = createScoreboardUI(
+      0,
       this.props.player1Name,
-      this.props.player1Fleet
+      this.props.player1Fleet,
+      this.props.turnOwner
     );
     let player2Score = createScoreboardUI(
+      1,
       this.props.player2Name,
-      this.props.player2Fleet
+      this.props.player2Fleet,
+      this.props.turnOwner
     );
     return (
       <>
@@ -27,7 +31,7 @@ export class ScoreBoard extends React.Component {
   }
 }
 
-function createScoreboardUI(playerName, fleet) {
+function createScoreboardUI(index, playerName, fleet, turnOwner) {
   let scoreboard = [];
   for (const ship in fleet) {
     if (fleet.hasOwnProperty(ship) && typeof fleet[ship] !== "function") {
@@ -46,7 +50,17 @@ function createScoreboardUI(playerName, fleet) {
   }
   return (
     <>
-      <p>{playerName}</p>
+      <p
+        className={`${
+          !turnOwner && index === 0
+            ? "current-player"
+            : turnOwner && index === 1
+            ? "current-player"
+            : undefined
+        }`}
+      >
+        {playerName}
+      </p>
       {scoreboard}
     </>
   );

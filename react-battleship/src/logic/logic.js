@@ -1,6 +1,6 @@
 import {
-  FREE,
-  TAKEN,
+  FALSE,
+  TRUE,
   BOARDWIDTH,
   BOARDHEIGHT,
   NORMAL_CELL,
@@ -15,7 +15,7 @@ export function createShip(length) {
   function hit() {
     hits++;
   }
-  function isSunk() {
+  function hasSunk() {
     return hits === length;
   }
   function hitsTaken() {
@@ -27,7 +27,7 @@ export function createShip(length) {
     orientation,
     hitsTaken,
     hit,
-    isSunk
+    hasSunk
   };
 }
 
@@ -65,7 +65,7 @@ export function createGameBoard(fleet) {
   let board = Array(10)
     .fill(null)
     .map(function() {
-      return Array(10).fill(FREE + ";open;" + NORMAL_CELL + ";none");
+      return Array(10).fill(FALSE + ";open;" + NORMAL_CELL + ";none");
     }); //Array(10).fill(Array(10).fill(0));        https://stackoverflow.com/questions/37949813/array-fillarray-creates-copies-by-references-not-by-value
   let randVals = [];
 
@@ -82,7 +82,7 @@ export function createGameBoard(fleet) {
     function markShipOnBoard(shipCords) {
       for (let i = 0; i < shipCords.length; i++) {
         board[shipCords[i][0]][shipCords[i][1]] =
-          TAKEN + ";open;" + NORMAL_CELL + ";" + shipName;
+          TRUE + ";open;" + NORMAL_CELL + ";" + shipName;
       }
     }
     function markShipNeighborsOnBoard(neighborCords) {
@@ -94,7 +94,7 @@ export function createGameBoard(fleet) {
           board[neighborCords[i][0]][neighborCords[i][1]] += shipName;
         else
           board[neighborCords[i][0]][neighborCords[i][1]] =
-            FREE + ";open;" + NEARBY_CELL + ";" + shipName;
+            FALSE + ";open;" + NEARBY_CELL + ";" + shipName;
       }
     }
     function rmvShipPosFromPool() {
@@ -222,10 +222,42 @@ export function createGameBoard(fleet) {
 }
 
 export function createPlayer(name, fleet, board) {
+  let validMoves = [];
+  for (let i = 0; i < 100; i++) {
+    validMoves.push(i);
+  }
+
   return {
     name,
     fleet,
     board,
-    lastClickedCell: undefined
+    lastClickedCell: undefined,
+    validMoves
+  };
+}
+
+export function createAI() {
+  let huntedShipHullHits = [];
+  function findLegalMoves(board) {
+    let legalMoves = [];
+    let y = huntedShipHullHits[0][0];
+    let x = huntedShipHullHits[0][1];
+    // if (huntedShipHullHits.length === 1) {
+    if (y - 1 >= 0 && board[y - 1][x].includes("open"))
+      legalMoves.push([y - 1, x]);
+    if (y + 1 < BOARDHEIGHT && board[y + 1][x].includes("open"))
+      legalMoves.push([y + 1, x]);
+    if (x - 1 >= 0 && board[y][x - 1].includes("open"))
+      legalMoves.push([y, x - 1]);
+    if (x + 1 < BOARDWIDTH && board[y][x + 1].includes("open"))
+      legalMoves.push([y, x + 1]);
+    // }
+    return legalMoves;
+  }
+
+  return {
+    huntedShip: null,
+    huntedShipHullHits,
+    findLegalMoves
   };
 }

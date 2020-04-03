@@ -1,6 +1,6 @@
 import React from "react";
 import "../index.css";
-import { MISS, HIT, TAKEN, NORMAL_CELL } from "../logic/const.js";
+import { MISS, HIT, TRUE, NORMAL_CELL } from "../logic/const.js";
 export class Cell extends React.Component {
   render() {
     if (this.props.type === "colIndex") {
@@ -28,13 +28,13 @@ export class Cell extends React.Component {
       ) {
         return (
           <>
-            {this.props.cellData.split(";")[0] === TAKEN ? (
+            {this.props.cellData.split(";")[0] === TRUE ? (
               <div
                 data-player={this.props.player}
                 data-cell={this.props.cellData}
                 data-identifier={this.props.identifier}
                 className={`${this.props.type} ship-cell`}
-                onClick={this.props.onCellClick}
+                // onClick={this.props.onCellClick}
               ></div>
             ) : (
               <div
@@ -42,7 +42,7 @@ export class Cell extends React.Component {
                 data-cell={this.props.cellData}
                 data-identifier={this.props.identifier}
                 className={`${this.props.type} base-cell`}
-                onClick={this.props.onCellClick}
+                // onClick={this.props.onCellClick}
               ></div>
             )}
           </>
@@ -57,7 +57,7 @@ export class Cell extends React.Component {
             data-cell={this.props.cellData}
             data-identifier={this.props.identifier}
             className={`${this.props.type} base-cell`}
-            onClick={this.props.onCellClick}
+            onClick={!this.props.gameOver ? this.props.onCellClick : undefined}
           ></div>
         );
       } else if (this.props.cellData.split(";")[1] === "closed") {
@@ -78,12 +78,12 @@ export class Cell extends React.Component {
                   this.props.identifier === this.props.lastClickedCell
                     ? this.props.type + " last-clicked-cell"
                     : this.props.type
-                } base-cell`}
+                } base-cell-miss`}
               >
                 <div className="ship-miss"></div>
               </div>
             ) : (
-              <div className={`${this.props.type} base-cell`}>
+              <div className={`${this.props.type} base-cell-miss`}>
                 <div className="auto-ship-miss"></div>
               </div>
             )}

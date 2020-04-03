@@ -5,9 +5,9 @@ import { Cell } from "../components/cell.js";
 export class GameBoard extends React.Component {
   render() {
     let elements = createGameBoardCells(
-      this.references,
       this.props.id,
       this.props.lastClickedCell,
+      this.props.gameOver,
       this.props.onCellClick,
       this.props.board,
       this.props.rows,
@@ -24,9 +24,9 @@ export class GameBoard extends React.Component {
 }
 
 function createGameBoardCells(
-  references,
   id,
   lastClickedCell,
+  gameOver,
   onCellClick,
   board,
   rows,
@@ -47,6 +47,7 @@ function createGameBoardCells(
             player={id}
             lastClickedCell={lastClickedCell}
             onCellClick={onCellClick}
+            gameOver={gameOver}
             cellData={board[i - 1][j - 1]}
             key={`${i} ${j}`}
             identifier={`${i - 1}${j - 1}`}
