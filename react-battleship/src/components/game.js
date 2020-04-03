@@ -227,35 +227,65 @@ export class Game extends React.Component {
       let fail = false;
       //timeout to simulate human player
       this.timeOut = setTimeout(() => {
-        //  if (!AI.huntedShip) {
-        do {
-          let rand =
-            players.player1.validMoves[
-              Math.floor(Math.random() * players.player1.validMoves.length)
-            ];
-          y = Math.floor(rand / 10);
-          x = rand % 10;
-          let indexOfRand = players.player1.validMoves.indexOf(rand);
+        if (!AI.huntedShip) {
+          do {
+            let rand =
+              players.player1.validMoves[
+                Math.floor(Math.random() * players.player1.validMoves.length)
+              ];
+            y = Math.floor(rand / 10);
+            x = rand % 10;
+            let indexOfRand = players.player1.validMoves.indexOf(rand);
 
-          if (players.player1.board[y][x].includes("open")) {
-            players.player1.validMoves.splice(indexOfRand, 1);
-            fail = false;
+            if (players.player1.board[y][x].includes("open")) {
+              players.player1.validMoves.splice(indexOfRand, 1);
+              fail = false;
 
-            // for readability
-            let hasShip = players.player1.board[y][x].split(";")[0];
-            let shipName = players.player1.board[y][x].split(";")[3];
+              // for readability
+              let hasShip = players.player1.board[y][x].split(";")[0];
+              let shipName = players.player1.board[y][x].split(";")[3];
 
-            this.handleCellClick(undefined, y, x, hasShip, shipName, "player1");
-            if (hasShip === TRUE) {
-              if (!players.player1.fleet[shipName].hasSunk()) {
+              this.handleCellClick(
+                undefined,
+                y,
+                x,
+                hasShip,
+                shipName,
+                "player1"
+              );
+
+              if (
+                hasShip === TRUE &&
+                !players.player1.fleet[shipName].hasSunk()
+              ) {
                 AI.huntedShip = shipName;
                 AI.huntedShipHullHits.push([y, x]);
-              } else AI.huntedShip = null;
-            }
-          } else fail = true;
-        } while (fail);
-        // } else if (AI.huntedShip) {}
-        //  }
+                console.log("hola", AI.huntedShipHullHits);
+              }
+            } else fail = true;
+          } while (fail);
+        } else if (AI.huntedShip) {
+          let legalMoves = AI.findLegalMoves(players.player1.board);
+          let legalMove =
+            legalMoves[Math.floor(Math.random() * legalMoves.length)];
+          console.log(legalMoves, legalMove);
+          y = legalMove[0];
+          x = legalMove[1];
+
+          let hasShip = players.player1.board[y][x].split(";")[0];
+          let shipName = players.player1.board[y][x].split(";")[3];
+
+          this.handleCellClick(undefined, y, x, hasShip, shipName, "player1");
+
+          if (hasShip === TRUE && !players.player1.fleet[shipName].hasSunk())
+            AI.huntedShipHullHits.push([y, x]);
+
+          if (players.player1.fleet[AI.huntedShip].hasSunk()) {
+            console.log("NOBRO");
+            AI.huntedShip = null;
+            AI.huntedShipHullHits.length = 0;
+          }
+        }
       }, timeoutLength);
     }
 

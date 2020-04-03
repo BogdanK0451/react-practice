@@ -30,7 +30,6 @@ export function createShip(length) {
     hasSunk
   };
 }
-
 export function createFleet() {
   let fleet = {
     cruiser1: createShip(4),
@@ -60,7 +59,6 @@ export function createFleet() {
     ...fleet
   };
 }
-
 export function createGameBoard(fleet) {
   let board = Array(10)
     .fill(null)
@@ -220,7 +218,6 @@ export function createGameBoard(fleet) {
   }
   return board;
 }
-
 export function createPlayer(name, fleet, board) {
   let validMoves = [];
   for (let i = 0; i < 100; i++) {
@@ -235,23 +232,48 @@ export function createPlayer(name, fleet, board) {
     validMoves
   };
 }
-
 export function createAI() {
   let huntedShipHullHits = [];
   function findLegalMoves(board) {
     let legalMoves = [];
-    let y = huntedShipHullHits[0][0];
-    let x = huntedShipHullHits[0][1];
-    // if (huntedShipHullHits.length === 1) {
-    if (y - 1 >= 0 && board[y - 1][x].includes("open"))
-      legalMoves.push([y - 1, x]);
-    if (y + 1 < BOARDHEIGHT && board[y + 1][x].includes("open"))
-      legalMoves.push([y + 1, x]);
-    if (x - 1 >= 0 && board[y][x - 1].includes("open"))
-      legalMoves.push([y, x - 1]);
-    if (x + 1 < BOARDWIDTH && board[y][x + 1].includes("open"))
-      legalMoves.push([y, x + 1]);
-    // }
+    if (huntedShipHullHits.length === 1) {
+      let [y, x] = huntedShipHullHits[0];
+      if (y - 1 >= 0 && board[y - 1][x].includes("open"))
+        legalMoves.push([y - 1, x]);
+      if (y + 1 < BOARDHEIGHT && board[y + 1][x].includes("open"))
+        legalMoves.push([y + 1, x]);
+      if (x - 1 >= 0 && board[y][x - 1].includes("open"))
+        legalMoves.push([y, x - 1]);
+      if (x + 1 < BOARDWIDTH && board[y][x + 1].includes("open"))
+        legalMoves.push([y, x + 1]);
+    } else if (huntedShipHullHits.length >= 2) {
+      let yCoords = huntedShipHullHits.map(elem => elem[0]);
+      let xCoords = huntedShipHullHits.map(elem => elem[1]);
+
+      let minX = Math.min(...xCoords);
+      let maxX = Math.max(...xCoords);
+      let minY = Math.min(...yCoords);
+      let maxY = Math.max(...yCoords);
+      if (yCoords[0] === yCoords[1]) {
+        if (minX - 1 >= 0 && board[yCoords[0]][minX - 1].includes("open")) {
+          legalMoves.push([yCoords[0], minX - 1]);
+        }
+        if (
+          maxX + 1 < BOARDWIDTH &&
+          board[yCoords[0]][maxX + 1].includes("open")
+        )
+          legalMoves.push([yCoords[0], maxX + 1]);
+      } else if (xCoords[0] === xCoords[1]) {
+        if (minY - 1 >= 0 && board[minY - 1][xCoords[0]].includes("open")) {
+          legalMoves.push([minY - 1, xCoords[0]]);
+        }
+        if (
+          maxY + 1 < BOARDWIDTH &&
+          board[maxY + 1][xCoords[0]].includes("open")
+        )
+          legalMoves.push([maxY + 1, xCoords[0]]);
+      }
+    }
     return legalMoves;
   }
 
